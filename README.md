@@ -1,7 +1,12 @@
-## Basic Programming College Project 
-### Member
-- 1
-- 2
-- 3
-- 4
-- 5
+## Permadi Care Pharmacy Inventory & Transaction System
+### Building
+```sh
+gcc main.c -o main.exe
+./main.exe
+```
+
+### Running Tests
+```
+gcc test.c -o test.exe
+./test.exe
+```
