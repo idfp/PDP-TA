@@ -38,6 +38,10 @@ int countLines(string name){
     return counter;
 }
 
+// login ke sistem dengan username dan password
+// users adalah array dari object user yang didapat dari file database/users.csv
+// apabila login berhasil akan menampilkan "Login berhasil" dan fungsi ini akan mengembalikan nilai 1
+// apabila login gagal akan menampilkan "Login gagal, silahkan coba lagi" dan fungsi ini akan mengembalikan nilai 0
 int login(string username, string password, User* users, int len){
     int isLoggedIn = 0;
     for(int i = 0; i < len; i++){
