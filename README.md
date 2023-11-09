@@ -1,11 +1,13 @@
 ## Permadi Care Pharmacy Inventory & Transaction System
 ### Building
 Clone this repository, or simply download it as ZIP.
+
 Via cloning: 
 ```sh
 git clone https://github.com/idfp/PDP-TA
 ```
 Via download as ZIP: 
+
 ![Image](https://i.ibb.co/s9kVc1m/image-2023-11-08-160045169.png)
 - Click the <>code button
 - Download as zip
