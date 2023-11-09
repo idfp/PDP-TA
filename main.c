@@ -144,7 +144,18 @@ void loadDrugs(FILE* file, Drug* drugs){
 }
 
 void showMenu(){
-    printf("Welcome! Pilih aksi yang akan dilakukan:\n1. List stok obat\n2. Cari obat\n3. Ubah data obat\n4. Hapus obat\n5. Exit\n> ");
+    printf("Welcome! Pilih aksi yang akan dilakukan:\n");
+    printf("1. List stok obat\n");
+    printf("2. Cari obat\n");
+    printf("3. Ubah data obat\n");
+    printf("4. Hapus obat\n");
+    printf("5. Tambah obat baru\n");
+    printf("6. List transaksi\n");
+    printf("7. Cari transaksi\n");
+    printf("8. Ubah transaksi\n");
+    printf("9. Hapus transaksi\n");
+    printf("10. Tambah transaksi baru\n");
+    printf("11. Exit\n> ");
 }
 
 int searchDrug(Drug* drugs, int len, char* column, char* value, Drug* result){
@@ -301,6 +312,33 @@ int deleteDrug(Drug* drugs, char* identifier, char* value, int len){
     LOG("data written to disk");
     return code;
 }
+
+Drug* addDrug(Drug* drugs, char* name, int price, int stock, int len){
+    Drug* drugsx = realloc(drugs, sizeof(Drug) * (len + 1));
+    drugsx[len].id = drugs[len - 1].id + 1;
+    strcpy(drugsx[len].name, name);
+    drugsx[len].price = price;
+    drugsx[len].priceUSD = (float) price / 15500;
+    drugsx[len].stock = stock;
+    FILE* db = fopen("database/drugs.csv", "w");
+    LOG("file opened\n");
+    char* text = (char*)malloc(sizeof(Drug) * (len + 1));
+    LOG("done memory allocating");
+    strcpy(text, "id,name,price_usd,price,stock");
+    LOG("first string copy");
+    for(int i = 0; i <= len; i++){
+        char buf[116];
+        sprintf(buf, "\n%d,%s,%.2f,%d,%d", drugsx[i].id, drugsx[i].name, drugsx[i].priceUSD, drugsx[i].price, drugsx[i].stock);
+        strcat(text, buf);
+    }
+    LOG("done doing string concat, about to print");
+    fprintf(db, text);
+    fclose(db);
+    LOG("data written to disk");
+
+    return drugsx;
+}
+
 int main(){
 
     printf("[32m  _____                              _ _    _____               \n");
@@ -328,17 +366,15 @@ int main(){
     int drugsAmount = countLines("database/drugs.csv");
     printf("Loaded %d drugs\n", drugsAmount);
     FILE *fdd = fopen("database/drugs.csv", "r");
-    Drug drugs[drugsAmount];
+    Drug* drugs = (Drug*) malloc(sizeof(Drug) * drugsAmount);
     loadDrugs(fdd, drugs);
     fclose(fdd);
     while(1){
         showMenu();
         int input;
-        char c = getchar();
-        input = atoi(&c);
-        int ch;
-        ch = fgetc(stdin);
-        if (ch != '\n') ungetc(ch, stdin);
+        char holder[5];
+        gets(holder);
+        input = atoi(holder);
 
         char property[10];
         char value[10];
@@ -346,6 +382,7 @@ int main(){
         Drug drug;
         char price[10];
         switch(input){
+            char holder[10];
             case 1:
                 printf("[31mId\tNama\t\t\tHarga\t\tStok[0m\n");
                 for(int i = 0; i < drugsAmount; i++){
@@ -384,7 +421,6 @@ int main(){
 
             case 3:
                 int id;
-                char holder[10];
                 printf("Masukkan ID obat yang akan diubah > ");
                 gets(holder);
                 printf("Masukkan properti yang akan diubah > ");
@@ -430,6 +466,22 @@ int main(){
                 printf("Obat berhasil dihapus\n");
                 break;
             case 5:
+                char name[100];
+                int pprice;
+                int stock;
+
+                printf("Masukan nama obat: ");
+                gets(name);
+                printf("Masukan harga obat: ");
+                gets(price);
+                pprice = atoi(price);
+                printf("Masukan stock obat: ");
+                gets(holder);
+                stock = atoi(holder);
+                drugs = addDrug(drugs, name, pprice, stock, drugsAmount);
+                drugsAmount++;
+                break;
+            case 11:
                 printf("Bye-bye!\n");
                 return 0;
 
