@@ -1,32 +1,29 @@
-#include "stdio.h"
-#include "string.h"
-#include "stdlib.h"
-#include "lib/sha256.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <lib/sha256.h>
 
 #define BUF_SIZE 65536
 #define DEBUG 1
 
-// buat tipe data string untuk mempermudah development
-typedef char* string;
-
 // tipe data user, menyimpan data tiap user sebagai object
-typedef struct Users{
+struct User{
     int id;
     char username[100];
     char password[100];
-} User;
+};
 
 //tipe data obat, menyimpan properti dari tiap obat di farmasi
-typedef struct Drugs{
+struct Drug{
     int id;
     char name[100];
     float priceUSD;
     int price;
     int stock;
-} Drug;
+};
 
 //tipe data transaksi, meynimpan properti dari tiap transaksi yang terjadi di farmasi
-typedef struct Transactions{
+struct Transaction{
     int id;
     char recipient[100];
     char drug[100];
@@ -41,19 +38,8 @@ void LOG(string log){
         printf("[DEBUG] %s \n", log);
     }
 }
-// menukar posisi elemen array obat, berguna pada bubble sort
-void swapDrug(Drug* x, Drug* y){ 
-    Drug temp = *x;
-    *x = *y;
-    *y = temp;
-}
-
-// menukar posisi elemen array transaksi, berguna pada bubble sort
-void swapTransaction(Transaction* x, Transaction* y){ 
-    Transaction temp = *x;
-    *x = *y;
-    *y = temp;
-}
+// menukar posisi elemen array, berguna pada bubble sort
+void swap(int* x, int* y){ int temp = *x; *x = *y; *y = temp; }
 
 // hitung jumlah baris dalam file, mengembalikan n - 1 baris
 int countLines(string name){
@@ -676,19 +662,20 @@ int main(){
         int x, y;
         int id;
         int index;
-        char sortby[10];
         switch(input){
             char holder[10];
             case 1:
-                printf("Sortir obat berdasar (id / name / price / stock)\n(klik enter untuk sortir berdasar id): ");
+                char sortby[10];
+                printf("Sortir obat berdasar (klik enter untuk sortir berdasar id): ");
                 gets(sortby);
+                Drugs drugsx[drugsAmount] = drugs;
                 if(strcmp(sortby, "name") == 0){
                     int i, j, swapped;
-                    for (i = 0; i < drugsAmount - 1; i++) {
+                    for (i = 0; i < n - 1; i++) {
                         swapped = 0;
-                        for (j = 0; j < drugsAmount - i - 1; j++) {
-                            if (strcmp(drugs[j].name, drugs[j + 1].name) > 0) {
-                                swapDrug(&drugs[j], &drugs[j + 1]);
+                        for (j = 0; j < n - i - 1; j++) {
+                            if (strcmp(drugsx[j].name, drugsx[j + 1].name) > 0) {
+                                swap(&drugsx[j], &drugsx[j + 1]);
                                 swapped = 1;
                             }
                         }
@@ -696,11 +683,11 @@ int main(){
                     }
                 }else if(strcmp(sortby, "price") == 0){
                     int i, j, swapped;
-                    for (i = 0; i < drugsAmount - 1; i++) {
+                    for (i = 0; i < n - 1; i++) {
                         swapped = 0;
-                        for (j = 0; j < drugsAmount - i - 1; j++) {
-                            if (drugs[j].price > drugs[j + 1].price) {
-                                swapDrug(&drugs[j], &drugs[j + 1]);
+                        for (j = 0; j < n - i - 1; j++) {
+                            if (drugsx[j].price > drugsx[j + 1].price) {
+                                swap(&drugsx[j], &drugsx[j + 1]);
                                 swapped = 1;
                             }
                         }
@@ -708,23 +695,11 @@ int main(){
                     }
                 }else if(strcmp(sortby, "stock") == 0){
                     int i, j, swapped;
-                    for (i = 0; i < drugsAmount - 1; i++) {
+                    for (i = 0; i < n - 1; i++) {
                         swapped = 0;
-                        for (j = 0; j < drugsAmount - i - 1; j++) {
-                            if (drugs[j].stock > drugs[j + 1].stock) {
-                                swapDrug(&drugs[j], &drugs[j + 1]);
-                                swapped = 1;
-                            }
-                        }
-                        if (swapped == 0) break;
-                    }
-                }else{
-                    int i, j, swapped;
-                    for (i = 0; i < drugsAmount - 1; i++) {
-                        swapped = 0;
-                        for (j = 0; j < drugsAmount - i - 1; j++) {
-                            if (drugs[j].id > drugs[j + 1].id) {
-                                swapDrug(&drugs[j], &drugs[j + 1]);
+                        for (j = 0; j < n - i - 1; j++) {
+                            if (drugsx[j].stock > drugsx[j + 1].stock) {
+                                swap(&drugsx[j], &drugsx[j + 1]);
                                 swapped = 1;
                             }
                         }
@@ -735,23 +710,23 @@ int main(){
                 printf("[31mId\tNama\t\t\tHarga\t\tStok[0m\n");
                 for(int i = 0; i < drugsAmount; i++){
                     char tabs[10] = "\t\t";
-                    if(strlen(drugs[i].name) < 8){
+                    if(strlen(drugsx[i].name) < 8){
                         strcpy(tabs, "\t\t\t");
                     }
-                    if(strlen(drugs[i].name) > 16){
+                    if(strlen(drugsx[i].name) > 16){
                         strcpy(tabs, "\t");
                     }
                     char price[10];
-                    int x = drugs[i].price / 1000;
-                    int y = drugs[i].price - (x * 1000);
+                    int x = drugsx[i].price / 1000;
+                    int y = drugsx[i].price - (x * 1000);
                     sprintf(price, "%d.%03d", x, y);
-                    printf("%d\t%s%sRp.%s,00\t%d\n", drugs[i].id, drugs[i].name, tabs, price, drugs[i].stock);
+                    printf("%d\t%s%sRp.%s,00\t%d\n", drugsx[i].id, drugsx[i].name, tabs, price, drugsx[i].stock);
                 }
                 printf("\n");
                 break;
 
             case 2:
-                printf("Masukan properti obat yang diketahui \n(id / name / price / stock, ketik dalam huruf kecil): ");
+                printf("Masukan properti obat yang diketahui (lowercase): ");
   
                 gets(property);
                 printf("Masukan nilai dari properti yang diketahui: ");
@@ -770,7 +745,7 @@ int main(){
             case 3:
                 printf("Masukkan ID obat yang akan diubah > ");
                 gets(holder);
-                printf("Masukkan properti yang akan diubah \n(id / name / price / stock, ketik dalam huruf kecil) > ");
+                printf("Masukkan properti yang akan diubah > ");
                 gets(property);
                 printf("Masukkan nilai baru properti tersebut > ");
                 gets(value);
@@ -798,7 +773,7 @@ int main(){
 
                 break;
             case 4:
-                printf("Masukkan properti obat yang diketahui \n(id / name / price / stock, ketik dalam huruf kecil) > ");
+                printf("Masukkan properti obat yang diketahui > ");
                 gets(property);
                 printf("Masukkan nilai properti dari obat yang akan dihapus > ");
                 gets(value);
@@ -830,69 +805,6 @@ int main(){
                 drugsAmount++;
                 break;
             case 6:
-                printf("Sortir transaksi berdasar (id / recipient / drug / amount / total)\n(klik enter untuk sortir berdasar id) > ");
-                gets(sortby);
-                if(strcmp(sortby, "recipient") == 0){
-                    int i, j, swapped;
-                    for (i = 0; i < transactionsAmount - 1; i++) {
-                        swapped = 0;
-                        for (j = 0; j < transactionsAmount - i - 1; j++) {
-                            if (strcmp(transactions[j].recipient, transactions[j + 1].recipient) > 0) {
-                                swapTransaction(&transactions[j], &transactions[j + 1]);
-                                swapped = 1;
-                            }
-                        }
-                        if (swapped == 0) break;
-                    }
-                }else if(strcmp(sortby, "drug") == 0){
-                    int i, j, swapped;
-                    for (i = 0; i < transactionsAmount - 1; i++) {
-                        swapped = 0;
-                        for (j = 0; j < transactionsAmount - i - 1; j++) {
-                            if (strcmp(transactions[j].drug, transactions[j + 1].drug) > 0) {
-                                swapTransaction(&transactions[j], &transactions[j + 1]);
-                                swapped = 1;
-                            }
-                        }
-                        if (swapped == 0) break;
-                    }
-                }else if(strcmp(sortby, "amount") == 0){
-                    int i, j, swapped;
-                    for (i = 0; i < transactionsAmount - 1; i++) {
-                        swapped = 0;
-                        for (j = 0; j < transactionsAmount - i - 1; j++) {
-                            if (transactions[j].amount > transactions[j + 1].amount) {
-                                swapTransaction(&transactions[j], &transactions[j + 1]);
-                                swapped = 1;
-                            }
-                        }
-                        if (swapped == 0) break;
-                    }
-                }else if(strcmp(sortby, "total") == 0){
-                    int i, j, swapped;
-                    for (i = 0; i < transactionsAmount - 1; i++) {
-                        swapped = 0;
-                        for (j = 0; j < transactionsAmount - i - 1; j++) {
-                            if (transactions[j].total > transactions[j + 1].total) {
-                                swapTransaction(&transactions[j], &transactions[j + 1]);
-                                swapped = 1;
-                            }
-                        }
-                        if (swapped == 0) break;
-                    }
-                }else{
-                    int i, j, swapped;
-                    for (i = 0; i < transactionsAmount - 1; i++) {
-                        swapped = 0;
-                        for (j = 0; j < transactionsAmount - i - 1; j++) {
-                            if (transactions[j].id > transactions[j + 1].id) {
-                                swapTransaction(&transactions[j], &transactions[j + 1]);
-                                swapped = 1;
-                            }
-                        }
-                        if (swapped == 0) break;
-                    }
-                }
                 printf("[31mId\tPembeli\t\t\tNama Obat\t\tTanggal\t\tJumlah\tTotal[0m\n");
                 for(int i = 0; i < transactionsAmount; i++){
                     char tabs[10] = "\t\t";
@@ -925,7 +837,7 @@ int main(){
                 break;
 
             case 7:
-                printf("Masukan properti transaksi yang diketahui\n(id / recipient / drug / amount / total, ketik dalam huruf kecil): ");
+                printf("Masukan properti transaksi yang diketahui (lowercase): ");
                 gets(property);
                 printf("Masukan nilai dari properti yang diketahui: ");
                 gets(value);
@@ -948,7 +860,7 @@ int main(){
             case 8:
                 printf("Masukkan ID transaksi yang akan diubah > ");
                 gets(holder);
-                printf("Masukkan properti yang akan diubah \n(id / recipient / drug / amount / total, ketik dalam huruf kecil) > ");
+                printf("Masukkan properti yang akan diubah > ");
                 gets(property);
                 printf("Masukkan nilai baru properti tersebut > ");
                 gets(value);
@@ -981,9 +893,9 @@ int main(){
                 printf("[34m%s - %s[0m\nID: %d\nNama Obat: %s\nJumlah: %d\nTotal: Rp.%s,00\n\n", transaction.recipient, transaction.date, transaction.id, transaction.drug, transaction.amount, price);
                 break;
             case 9:
-                printf("Masukkan properti transaksi yang diketahui \n(id / recipient / drug / amount / total, ketik dalam huruf kecil) > ");
+                printf("Masukkan properti obat yang diketahui > ");
                 gets(property);
-                printf("Masukkan nilai properti dari transaksi yang akan dihapus > ");
+                printf("Masukkan nilai properti dari obat yang akan dihapus > ");
                 gets(value);
                 res = deleteTransaction(transactions, property, value, transactionsAmount);
                 if(res == 0){
