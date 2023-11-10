@@ -582,7 +582,24 @@ Transaction* addTransaction(Transaction* transactions, string recipient, string 
     strcpy(transactionsx[len].drug, drug);
     transactionsx[len].total = total;
     transactionsx[len].amount = amount;
-
+    
+    LOG("done updating in memory data, otw save to disk");
+    FILE* db = fopen("database/transactions.csv", "w");
+    LOG("file opened\n");
+    string text = (string)malloc(sizeof(Transaction) * (len + 1));
+    LOG("done memory allocating");
+    strcpy(text, "id,recipient,drug,amount,total,date");
+    LOG("first string copy");
+    for(int i = 0; i < len; i++){
+        char buf[116];
+        sprintf(buf, "\n%d,%s,%s,%d,%d,%s", transactions[i].id, transactions[i].recipient, transactions[i].amount, transactions[i].total, transactions[i].date);
+        strcat(text, buf);
+    }
+    LOG("done doing string concat, about to print");
+    fprintf(db, text);
+    fclose(db);
+    LOG("data written to disk");
+    return transactionsx;
 }
 int main(){
 
