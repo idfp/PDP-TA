@@ -25,8 +25,18 @@ typedef struct Drugs{
     int stock;
 } Drug;
 
+//tipe data transaksi, meynimpan properti dari tiap transaksi yang terjadi di farmasi
+typedef struct Transactions{
+    int id;
+    char recipient[100];
+    char drug[100];
+    int amount;
+    int total;
+    char date[20];
+} Transaction;
+
 // log untuk debugging program
-void LOG(char* log){
+void LOG(string log){
     if(DEBUG == 1){
         printf("[DEBUG] %s \n", log);
     }
@@ -91,10 +101,10 @@ void loadUsers(FILE *file, User* users){
         *(&db[0] + i) = ch;   
     }
     *(&db[0] + size) = '\0';
-    char* perline;
-    char* percomma;
-    char* dbrest = db;
-    char* linerest;
+    string perline;
+    string percomma;
+    string dbrest = db;
+    string linerest;
     int i = 0;
     while((perline = strtok_r(dbrest, "\n", &dbrest))){
         if(i == 0){
@@ -123,10 +133,10 @@ void loadDrugs(FILE* file, Drug* drugs){
         *(&db[0] + i) = ch;   
     }
     *(&db[0] + size) = '\0';
-    char* perline;
-    char* percomma;
-    char* dbrest = db;
-    char* linerest;
+    string perline;
+    string percomma;
+    string dbrest = db;
+    string linerest;
     int i = 0;
     while((perline = strtok_r(dbrest, "\n", &dbrest))){
         if(i == 0){
@@ -158,7 +168,7 @@ void showMenu(){
     printf("11. Exit\n> ");
 }
 
-int searchDrug(Drug* drugs, int len, char* column, char* value, Drug* result){
+int searchDrug(Drug* drugs, int len, string column, string value, Drug* result){
     if(strcmp(column, "id") == 0){
         for(int i = 0; i < len; i++){
             if(drugs[i].id == atoi(value)){
@@ -202,7 +212,7 @@ int searchDrug(Drug* drugs, int len, char* column, char* value, Drug* result){
 // 0 : obat tidak ditemukan
 // 1 : perubahan berhasil
 // 2 : properti yang diberikan tidak sesuai
-int updateDrug(Drug* drugs, char* property, char* value, int id, int len){
+int updateDrug(Drug* drugs, string property, string value, int id, int len){
     int index = -1;
     for(int i = 0; i < len; i++){
         if(drugs[i].id == id){
@@ -236,7 +246,7 @@ int updateDrug(Drug* drugs, char* property, char* value, int id, int len){
     LOG("done updating in memory data, otw save to disk");
     FILE* db = fopen("database/drugs.csv", "w");
     LOG("file opened\n");
-    char* text = (char*)malloc(sizeof(Drug) * (len + 1));
+    string text = (string)malloc(sizeof(Drug) * (len + 1));
     LOG("done memory allocating");
     strcpy(text, "id,name,price_usd,price,stock");
     LOG("first string copy");
@@ -253,7 +263,7 @@ int updateDrug(Drug* drugs, char* property, char* value, int id, int len){
 }
 
 
-int deleteDrug(Drug* drugs, char* identifier, char* value, int len){
+int deleteDrug(Drug* drugs, string identifier, string value, int len){
     int code = 0;
     int index;
     if(strcmp(identifier, "id") == 0){
@@ -297,7 +307,7 @@ int deleteDrug(Drug* drugs, char* identifier, char* value, int len){
     }
     FILE* db = fopen("database/drugs.csv", "w");
     LOG("file opened\n");
-    char* text = (char*)malloc(sizeof(Drug) * (len + 1));
+    string text = (string)malloc(sizeof(Drug) * (len + 1));
     LOG("done memory allocating");
     strcpy(text, "id,name,price_usd,price,stock");
     LOG("first string copy");
@@ -313,7 +323,7 @@ int deleteDrug(Drug* drugs, char* identifier, char* value, int len){
     return code;
 }
 
-Drug* addDrug(Drug* drugs, char* name, int price, int stock, int len){
+Drug* addDrug(Drug* drugs, string name, int price, int stock, int len){
     Drug* drugsx = realloc(drugs, sizeof(Drug) * (len + 1));
     drugsx[len].id = drugs[len - 1].id + 1;
     strcpy(drugsx[len].name, name);
@@ -322,7 +332,7 @@ Drug* addDrug(Drug* drugs, char* name, int price, int stock, int len){
     drugsx[len].stock = stock;
     FILE* db = fopen("database/drugs.csv", "w");
     LOG("file opened\n");
-    char* text = (char*)malloc(sizeof(Drug) * (len + 1));
+    string text = (string)malloc(sizeof(Drug) * (len + 1));
     LOG("done memory allocating");
     strcpy(text, "id,name,price_usd,price,stock");
     LOG("first string copy");
@@ -339,6 +349,241 @@ Drug* addDrug(Drug* drugs, char* name, int price, int stock, int len){
     return drugsx;
 }
 
+void loadTransactions(FILE* file, Transaction* transactions){
+    fseek(file, 0L, SEEK_END);
+    int size = ftell(file);
+    rewind(file);
+    char ch;
+    string db = (string) malloc(size * sizeof(char) + 16);
+    for(int i = 0; i < size; i++){
+        ch = getc(file);
+        *(&db[0] + i) = ch;   
+    }
+    *(&db[0] + size) = '\0';
+    LOG("Done loading transactions file to memory, about to do space trimming");
+    for(int i = 0; i < 45; i++){
+        db[size - i] = '\0';
+    }
+    LOG("Done doing space trimming");
+    string perline;
+    string percomma;
+    string dbrest = db;
+    string linerest;
+    int i = 0;
+    while((perline = strtok_r(dbrest, "\n", &dbrest))){
+        if(i == 0){
+            i++;
+            continue;
+        }
+        linerest = perline;
+        transactions[i - 1].id = atoi(strtok_r(linerest, ",", &linerest));
+        strcpy(transactions[i - 1].recipient, strtok_r(linerest, ",", &linerest));
+        strcpy(transactions[i - 1].drug, strtok_r(linerest, ",", &linerest));
+        transactions[i - 1].amount = atoi(strtok_r(linerest, ",", &linerest));
+        transactions[i - 1].total = atoi(strtok_r(linerest, ",", &linerest));
+        strcpy(transactions[i - 1].date, strtok_r(linerest, ",", &linerest));
+        i++;
+    }
+}
+
+
+int searchTransaction(Transaction* transactions, int len, string column, string value, Transaction* result){
+    if(strcmp(column, "id") == 0){
+        for(int i = 0; i < len; i++){
+            if(transactions[i].id == atoi(value)){
+                *result = transactions[i];
+                return 1;
+            }
+        }
+    }
+    else if(strcmp(column, "recipient") == 0){
+        for(int i = 0; i < len; i++){
+            if(strcmp(transactions[i].recipient, value) == 0){
+                *result = transactions[i];
+                return 1;
+            }
+        }
+    }
+    else if(strcmp(column, "drug") == 0){
+        for(int i = 0; i < len; i++){
+            if(strcmp(transactions[i].drug, value) == 0){
+                *result = transactions[i];
+                return 1;
+            }
+        }
+    }
+    else if(strcmp(column, "amount") == 0){
+        for(int i = 0; i < len; i++){
+            if(transactions[i].amount == atoi(value)){
+                *result = transactions[i];
+                return 1;
+            }
+        }
+    }
+    else if(strcmp(column, "total") == 0){
+        for(int i = 0; i < len; i++){
+            if(transactions[i].total == atoi(value)){
+                *result = transactions[i];
+                return 1;
+            }
+        }
+    }
+    else if(strcmp(column, "date") == 0){
+        for(int i = 0; i < len; i++){
+            if(strcmp(transactions[i].date, value) == 0){
+                *result = transactions[i];
+                return 1;
+            }
+        }
+    }
+    else{
+        return 0;
+    }
+}
+
+int updateTransaction(Transaction* transactions, string property, string value, int id, int len){
+    int index = -1;
+    for(int i = 0; i < len; i++){
+        if(transactions[i].i == id){
+            index = i;
+        }
+    }
+    int code = 0;
+    if(index == -1){
+        return code;
+    }
+    if(strcmp(property, "id") == 0){
+        transactions[index].id = atoi(value);
+        code = 1;
+    }
+    else if(strcmp(property, "recipient") == 0){
+        strcpy(transactions[index].recipient, value);
+        code = 1;
+    }
+    else if(strcmp(property, "drug") == 0){
+        strcpy(transactions[index].drug, value);
+        code = 1;
+    }
+    else if(strcmp(property, "date") == 0){
+        strcpy(transactions[index].date, value);
+        code = 1;
+    }
+    else if(strcmp(property, "amount") == 0){
+        transactions[index].amount = atoi(value);
+        code = 1;
+    }
+    else if(strcmp(property, "total") == 0){
+        transactions[index].total = atoi(value);
+        code = 1;
+    }else{
+        code = 2;
+        return code;
+    }
+    LOG("done updating in memory data, otw save to disk");
+    FILE* db = fopen("database/transactions.csv", "w");
+    LOG("file opened\n");
+    string text = (string)malloc(sizeof(Transaction) * (len + 1));
+    LOG("done memory allocating");
+    strcpy(text, "id,recipient,drug,amount,total,date");
+    LOG("first string copy");
+    for(int i = 0; i < len; i++){
+        char buf[116];
+        sprintf(buf, "\n%d,%s,%s,%d,%d,%s", transactions[i].id, transactions[i].recipient, transactions[i].amount, transactions[i].total, transactions[i].date);
+        strcat(text, buf);
+    }
+    LOG("done doing string concat, about to print");
+    fprintf(db, text);
+    fclose(db);
+    LOG("data written to disk");
+    return code;
+}
+
+int deleteTransaction(Transaction* transactions, string identifier, string value, int len){
+    int code = 0;
+    int index;
+    if(strcmp(identifier, "id") == 0){
+        for(int i = 0; i < len; i++){
+            if(transactions[i].id == atoi(value)){
+                index = i;
+                code = 1;
+            }
+        }
+    }
+    else if(strcmp(identifier, "recipient") == 0){
+        for(int i = 0; i < len; i++){
+            if(strcmp(transactions[i].recipient, value) == 0){
+                index = i;
+                code = 1;
+            }
+        }
+    }
+    else if(strcmp(identifier, "drug") == 0){
+        for(int i = 0; i < len; i++){
+            if(strcmp(transactions[i].drug, value) == 0){
+                index = i;
+                code = 1;
+            }
+        }
+    }
+    else if(strcmp(identifier, "date") == 0){
+        for(int i = 0; i < len; i++){
+            if(strcmp(transactions[i].date, value) == 0){
+                index = i;
+                code = 1;
+            }
+        }
+    }
+    else if(strcmp(identifier, "amount") == 0){
+        for(int i = 0; i < len; i++){
+            if(transactions[i].amount == atoi(value)){
+                index = i;
+                code = 1;
+            }
+        }
+    }
+    else if(strcmp(identifier, "total") == 0){
+        for(int i = 0; i < len; i++){
+            if(transactions[i].total == atoi(value)){
+                index = i;
+                code = 1;
+            }
+        }
+    }else{
+        code = 2;
+        return code;
+    }
+    for(int i = index; i < len - 1; i++){
+        transactions[i] = transactions[i + 1];
+    }
+    LOG("done updating in memory data, otw save to disk");
+    FILE* db = fopen("database/transactions.csv", "w");
+    LOG("file opened\n");
+    string text = (string)malloc(sizeof(Transaction) * (len + 1));
+    LOG("done memory allocating");
+    strcpy(text, "id,recipient,drug,amount,total,date");
+    LOG("first string copy");
+    for(int i = 0; i < len; i++){
+        char buf[116];
+        sprintf(buf, "\n%d,%s,%s,%d,%d,%s", transactions[i].id, transactions[i].recipient, transactions[i].amount, transactions[i].total, transactions[i].date);
+        strcat(text, buf);
+    }
+    LOG("done doing string concat, about to print");
+    fprintf(db, text);
+    fclose(db);
+    LOG("data written to disk");
+    return code;
+}
+
+Transaction* addTransaction(Transaction* transactions, string recipient, string drug, int amount, int total, string date, int len){
+    Transaction* transactionsx = realloc(transactions, sizeof(Transaction) * (len + 1));
+    transactionsx[len].id = transactions[len - 1].id + 1;
+    strcpy(transactionsx[len].recipient, recipient);
+    strcpy(transactionsx[len].date, date);
+    strcpy(transactionsx[len].drug, drug);
+    transactionsx[len].total = total;
+    transactionsx[len].amount = amount;
+
+}
 int main(){
 
     printf("[32m  _____                              _ _    _____               \n");
@@ -365,10 +610,17 @@ int main(){
 
     int drugsAmount = countLines("database/drugs.csv");
     printf("Loaded %d drugs\n", drugsAmount);
-    FILE *fdd = fopen("database/drugs.csv", "r");
+    FILE* fdd = fopen("database/drugs.csv", "r");
     Drug* drugs = (Drug*) malloc(sizeof(Drug) * drugsAmount);
     loadDrugs(fdd, drugs);
     fclose(fdd);
+
+    int transactionsAmount = countLines("database/transactions.csv");
+    FILE* fdt = fopen("database/transactions.csv", "r");
+    Transaction* transactions = (Transaction*) malloc(sizeof(Transaction) * transactionsAmount);
+    loadTransactions(fdt, transactions);
+    fclose(fdt);
+
     while(1){
         showMenu();
         int input;
@@ -380,7 +632,10 @@ int main(){
         char value[10];
         int res;
         Drug drug;
-        char price[10];
+        Transaction transaction;
+        char price[20];
+        int x, y;
+        int id;
         switch(input){
             char holder[10];
             case 1:
@@ -396,7 +651,7 @@ int main(){
                     char price[10];
                     int x = drugs[i].price / 1000;
                     int y = drugs[i].price - (x * 1000);
-                    sprintf(price, "%d.%d", x, y);
+                    sprintf(price, "%d.%03d", x, y);
                     printf("%d\t%s%sRp.%s,00\t%d\n", drugs[i].id, drugs[i].name, tabs, price, drugs[i].stock);
                 }
                 printf("\n");
@@ -413,14 +668,13 @@ int main(){
                     printf("Tidak ada obat yang ditemukan\n");
                     break;
                 }
-                int x = drug.price / 1000;
-                int y = drug.price - (x * 1000);
-                sprintf(price, "%d.%d", x, y);
+                x = drug.price / 1000;
+                y = drug.price - (x * 1000);
+                sprintf(price, "%d.%03d", x, y);
                 printf("[34m%s[0m\nID: %d\nHarga: Rp.%s,00\nHarga (USD): $%.2f\nStock: %d\n\n", drug.name, drug.id, price, drug.priceUSD, drug.stock);
                 break;
 
             case 3:
-                int id;
                 printf("Masukkan ID obat yang akan diubah > ");
                 gets(holder);
                 printf("Masukkan properti yang akan diubah > ");
@@ -446,7 +700,7 @@ int main(){
                 drug = drugs[index];
                 int a = drug.price / 1000;
                 int b = drug.price - (a * 1000);
-                sprintf(price, "%d.%d", a, b);
+                sprintf(price, "%d.%03d", a, b);
                 printf("[34m%s[0m\nID: %d\nHarga: Rp.%s,00\nHarga (USD): $%.2f\nStock: %d\n\n", drug.name, drug.id, price, drug.priceUSD, drug.stock);
 
                 break;
@@ -481,6 +735,95 @@ int main(){
                 drugs = addDrug(drugs, name, pprice, stock, drugsAmount);
                 drugsAmount++;
                 break;
+            case 6:
+                printf("[31mId\tPembeli\t\t\tNama Obat\t\tTanggal\t\tJumlah\tTotal[0m\n");
+                for(int i = 0; i < transactionsAmount; i++){
+                    char tabs[10] = "\t\t";
+                    if(strlen(transactions[i].drug) < 8){
+                        strcpy(tabs, "\t\t\t");
+                    }
+                    if(strlen(transactions[i].drug) > 16){
+                        strcpy(tabs, "\t");
+                    }
+                    char nameTabs[10] = "\t\t";
+                    if(strlen(transactions[i].recipient) < 8){
+                        strcpy(nameTabs, "\t\t\t");
+                    }
+                    if(strlen(transactions[i].recipient) >= 16){
+                        strcpy(nameTabs, "\t");
+                    }
+                    char price[20];
+                    int x = transactions[i].total / 1000;
+                    int y = transactions[i].total - (x * 1000);
+                    if(x > 999){
+                        int w = x / 1000;
+                        x = x - (w * 1000);
+                        sprintf(price, "%d.%03d.%03d", w, x, y);
+                    }else{
+                        sprintf(price, "%d.%03d", x, y);
+                    }
+                    printf("%d\t%s%s%s%s%s\t%d\tRp.%s,00\n", transactions[i].id, transactions[i].recipient, nameTabs, transactions[i].drug, tabs, transactions[i].date, transactions[i].amount, price);
+                }
+                printf("\n");
+                break;
+
+            case 7:
+                printf("Masukan properti transaksi yang diketahui (lowercase): ");
+                gets(property);
+                printf("Masukan nilai dari properti yang diketahui: ");
+                gets(value);
+                res = searchTransaction(transactions, transactionsAmount, property, value, &transaction);
+                if(res == 0){
+                    printf("Tidak ada transaksi yang ditemukan\n");
+                    break;
+                }
+                x = transaction.total / 1000;
+                y = transaction.total - (x * 1000);
+                if(x > 999){
+                    int w = x / 1000;
+                    x = x - (w * 1000);
+                    sprintf(price, "%d.%03d.%03d", w, x, y);
+                }else{
+                    sprintf(price, "%d.%03d", x, y);
+                }
+                printf("[34m%s - %s[0m\nID: %d\nNama Obat: %s\nJumlah: %d\nTotal: Rp.%s,00\n\n", transaction.recipient, transaction.date, transaction.id, transaction.drug, transaction.amount, price);
+                break;
+            case 8:
+                printf("Masukkan ID transaksi yang akan diubah > ");
+                gets(holder);
+                printf("Masukkan properti yang akan diubah > ");
+                gets(property);
+                printf("Masukkan nilai baru properti tersebut > ");
+                gets(value);
+                id = atoi(holder);
+                res = updateTransaction(transactions, property, value, id, transactionsAmount);
+                if(res == 0){
+                    printf("Transaksi tidak ditemukan... \n");
+                    break;
+                }else if(res == 2){
+                    printf("Properti yang diberikan tidak sesuai...\n");
+                    break;
+                }
+                printf("Data berhasil diubah.\n");
+                int index = 0;
+                for(int i = 0; i < transactionsAmount; i++){
+                    if(transactions[i].id == id){
+                        index = i;
+                    }
+                }
+                transaction = transactions[index];
+                x = transaction.total / 1000;
+                y = transaction.total - (x * 1000);
+                if(x > 999){
+                    int w = x / 1000;
+                    x = x - (w * 1000);
+                    sprintf(price, "%d.%03d.%03d", w, x, y);
+                }else{
+                    sprintf(price, "%d.%03d", x, y);
+                }
+                printf("[34m%s - %s[0m\nID: %d\nNama Obat: %s\nJumlah: %d\nTotal: Rp.%s,00\n\n", transaction.recipient, transaction.date, transaction.id, transaction.drug, transaction.amount, price);
+            case 9:
+
             case 11:
                 printf("Bye-bye!\n");
                 return 0;

@@ -1,14 +1,9 @@
 #include "stdio.h"
 
-typedef struct Drugs{
-    int id;
-    char name[100];
-    float priceUSD;
-    int price;
-    int stock;
-} Drug;
-
 int main(){
-    printf("%d\n", sizeof(Drug));
-    return 0;
+    FILE* file = fopen("database/transactions.csv", "r");
+    fseek(file, 0L, SEEK_END);
+    int size = ftell(file);
+    rewind(file);
+    printf("transactions is %d bytes\n", size);
 }
