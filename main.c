@@ -311,11 +311,12 @@ int deleteDrug(Drug* drugs, string identifier, string value, int len){
     LOG("done memory allocating");
     strcpy(text, "id,name,price_usd,price,stock");
     LOG("first string copy");
-    for(int i = 0; i < len; i++){
+    for(int i = 0; i < len - 1; i++){
         char buf[116];
         sprintf(buf, "\n%d,%s,%.2f,%d,%d", drugs[i].id, drugs[i].name, drugs[i].priceUSD, drugs[i].price, drugs[i].stock);
         strcat(text, buf);
     }
+
     LOG("done doing string concat, about to print");
     fprintf(db, text);
     fclose(db);
@@ -361,7 +362,7 @@ void loadTransactions(FILE* file, Transaction* transactions){
     }
     *(&db[0] + size) = '\0';
     LOG("Done loading transactions file to memory, about to do space trimming");
-    for(int i = 0; i < 45; i++){
+    for(int i = 0; i < 46; i++){
         db[size - i] = '\0';
     }
     LOG("Done doing space trimming");
@@ -444,7 +445,7 @@ int searchTransaction(Transaction* transactions, int len, string column, string 
 int updateTransaction(Transaction* transactions, string property, string value, int id, int len){
     int index = -1;
     for(int i = 0; i < len; i++){
-        if(transactions[i].i == id){
+        if(transactions[i].id == id){
             index = i;
         }
     }
@@ -488,9 +489,10 @@ int updateTransaction(Transaction* transactions, string property, string value, 
     LOG("first string copy");
     for(int i = 0; i < len; i++){
         char buf[116];
-        sprintf(buf, "\n%d,%s,%s,%d,%d,%s", transactions[i].id, transactions[i].recipient, transactions[i].amount, transactions[i].total, transactions[i].date);
+        sprintf(buf, "\n%d,%s,%s,%d,%d,%s", transactions[i].id, transactions[i].recipient, transactions[i].drug, transactions[i].amount, transactions[i].total, transactions[i].date);
         strcat(text, buf);
     }
+    text[strlen(text) - 1] = '\0';
     LOG("done doing string concat, about to print");
     fprintf(db, text);
     fclose(db);
@@ -552,21 +554,24 @@ int deleteTransaction(Transaction* transactions, string identifier, string value
         code = 2;
         return code;
     }
-    for(int i = index; i < len - 1; i++){
+    int i;
+    for(i = index; i < len - 1; i++){
         transactions[i] = transactions[i + 1];
     }
     LOG("done updating in memory data, otw save to disk");
     FILE* db = fopen("database/transactions.csv", "w");
-    LOG("file opened\n");
+    LOG("file opened");
     string text = (string)malloc(sizeof(Transaction) * (len + 1));
     LOG("done memory allocating");
     strcpy(text, "id,recipient,drug,amount,total,date");
     LOG("first string copy");
-    for(int i = 0; i < len; i++){
+    for(int i = 0; i < len - 1; i++){
         char buf[116];
-        sprintf(buf, "\n%d,%s,%s,%d,%d,%s", transactions[i].id, transactions[i].recipient, transactions[i].amount, transactions[i].total, transactions[i].date);
+        sprintf(buf, "\n%d,%s,%s,%d,%d,%s", transactions[i].id, transactions[i].recipient, transactions[i].drug, transactions[i].amount, transactions[i].total, transactions[i].date);
         strcat(text, buf);
     }
+    text[strlen(text) - 1] = '\0';
+    strcat(text, "\0");
     LOG("done doing string concat, about to print");
     fprintf(db, text);
     fclose(db);
@@ -582,17 +587,20 @@ Transaction* addTransaction(Transaction* transactions, string recipient, string 
     strcpy(transactionsx[len].drug, drug);
     transactionsx[len].total = total;
     transactionsx[len].amount = amount;
-    
+
     LOG("done updating in memory data, otw save to disk");
     FILE* db = fopen("database/transactions.csv", "w");
-    LOG("file opened\n");
+    LOG("file opened");
     string text = (string)malloc(sizeof(Transaction) * (len + 1));
     LOG("done memory allocating");
     strcpy(text, "id,recipient,drug,amount,total,date");
     LOG("first string copy");
-    for(int i = 0; i < len; i++){
+    for(int i = 0; i <= len; i++){
         char buf[116];
-        sprintf(buf, "\n%d,%s,%s,%d,%d,%s", transactions[i].id, transactions[i].recipient, transactions[i].amount, transactions[i].total, transactions[i].date);
+        sprintf(buf, "\n%d,%s,%s,%d,%d,%s", transactionsx[i].id, transactionsx[i].recipient, transactionsx[i].drug, transactionsx[i].amount, transactionsx[i].total, transactionsx[i].date);
+        if(i == len - 1){
+            buf[strlen(buf) - 1] = '\0';
+        }
         strcat(text, buf);
     }
     LOG("done doing string concat, about to print");
@@ -626,13 +634,14 @@ int main(){
     } while (login(username, password, users, usersAmount) != 1);
 
     int drugsAmount = countLines("database/drugs.csv");
-    printf("Loaded %d drugs\n", drugsAmount);
+    printf("Ditemukan data %d obat\n", drugsAmount);
     FILE* fdd = fopen("database/drugs.csv", "r");
     Drug* drugs = (Drug*) malloc(sizeof(Drug) * drugsAmount);
     loadDrugs(fdd, drugs);
     fclose(fdd);
 
     int transactionsAmount = countLines("database/transactions.csv");
+    printf("Ditemukan data %d transaksi\n", transactionsAmount);
     FILE* fdt = fopen("database/transactions.csv", "r");
     Transaction* transactions = (Transaction*) malloc(sizeof(Transaction) * transactionsAmount);
     loadTransactions(fdt, transactions);
@@ -645,14 +654,15 @@ int main(){
         gets(holder);
         input = atoi(holder);
 
-        char property[10];
-        char value[10];
+        char property[100];
+        char value[100];
         int res;
         Drug drug;
         Transaction transaction;
         char price[20];
         int x, y;
         int id;
+        int index;
         switch(input){
             char holder[10];
             case 1:
@@ -708,7 +718,7 @@ int main(){
                     break;
                 }
                 printf("Data berhasil diubah.\n");
-                int index = 0;
+                index = 0;
                 for(int i = 0; i < drugsAmount; i++){
                     if(drugs[i].id == id){
                         index = i;
@@ -734,6 +744,7 @@ int main(){
                     printf("Properti yang diberikan tidak sesuai...\n");
                     break;
                 }
+                drugsAmount--;
                 printf("Obat berhasil dihapus\n");
                 break;
             case 5:
@@ -822,7 +833,7 @@ int main(){
                     break;
                 }
                 printf("Data berhasil diubah.\n");
-                int index = 0;
+                index = 0;
                 for(int i = 0; i < transactionsAmount; i++){
                     if(transactions[i].id == id){
                         index = i;
@@ -839,8 +850,46 @@ int main(){
                     sprintf(price, "%d.%03d", x, y);
                 }
                 printf("[34m%s - %s[0m\nID: %d\nNama Obat: %s\nJumlah: %d\nTotal: Rp.%s,00\n\n", transaction.recipient, transaction.date, transaction.id, transaction.drug, transaction.amount, price);
+                break;
             case 9:
-
+                printf("Masukkan properti obat yang diketahui > ");
+                gets(property);
+                printf("Masukkan nilai properti dari obat yang akan dihapus > ");
+                gets(value);
+                res = deleteTransaction(transactions, property, value, transactionsAmount);
+                if(res == 0){
+                    printf("Transaksi tidak ditemukan... \n");
+                    break;
+                }else if(res == 2){
+                    printf("Properti yang diberikan tidak sesuai...\n");
+                    break;
+                }
+                transactionsAmount--;
+                printf("Transaksi berhasil dihapus\n");
+                break;
+            case 10:
+                char recipient[100];
+                char ddrug[100];
+                char date[100];
+                int amount;
+                int total;
+                char holder1[20];
+                char holder2[20];
+                printf("Masukan nama pembeli: ");
+                gets(recipient);
+                printf("Masukan nama obat yang dibeli: ");
+                gets(ddrug);
+                printf("Masukan tanggal pembelian: ");
+                gets(date);
+                printf("Masukan jumlah obat yang dibeli: ");
+                gets(holder1);
+                amount = atoi(holder1);
+                printf("Masukan total yang harus dibayar: ");
+                gets(holder2);
+                total = atoi(holder2);
+                transactions = addTransaction(transactions, recipient, ddrug, amount, total, date, transactionsAmount);
+                transactionsAmount++;
+                break;
             case 11:
                 printf("Bye-bye!\n");
                 return 0;
