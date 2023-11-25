@@ -2,9 +2,10 @@
 #include "string.h"
 #include "stdlib.h"
 #include "lib/sha256.h"
+#include "ctype.h"
 
 #define BUF_SIZE 65536
-#define DEBUG 1
+#define DEBUG 0
 
 // buat tipe data string untuk mempermudah development
 typedef char* string;
@@ -15,7 +16,6 @@ typedef struct Users{
     char username[100];
     char password[100];
 } User;
-
 //tipe data obat, menyimpan properti dari tiap obat di farmasi
 typedef struct Drugs{
     int id;
@@ -78,6 +78,31 @@ int countLines(string name){
     return counter;
 }
 
+void removeNonPrintable(char *str) {
+    int i, j;
+    for (i = 0, j = 0; str[i] != '\0'; i++) {
+        if (isprint((unsigned char)str[i]) || str[i] == '\n') {
+            str[j++] = str[i];
+        }
+    }
+    str[j] = '\0'; // Null-terminate the modified string
+}
+
+void trimTrailingSpaces(char *str) {
+    int length = strlen(str);
+
+    // Start from the end and move towards the beginning
+    for (int i = length - 1; i >= 0; i--) {
+        // Check if the character is a space or a newline
+        if (str[i] == ' ' || str[i] == '\t' || str[i] == '\n') {
+            // Replace with null terminator to truncate the string
+            str[i] = '\0';
+        } else {
+            // Break the loop if a non-space character is encountered
+            break;
+        }
+    }
+}
 // login ke sistem dengan username dan password
 // users adalah array dari object user yang didapat dari file database/users.csv
 // apabila login berhasil akan menampilkan "Login berhasil" dan fungsi ini akan mengembalikan nilai 1
@@ -143,6 +168,7 @@ void loadDrugs(FILE* file, Drug* drugs){
     string db = (string) malloc(size * sizeof(char) + 4);
     for(int i = 0; i < size; i++){
         ch = getc(file);
+        if(ch == EOF) break;
         *(&db[0] + i) = ch;   
     }
     *(&db[0] + size) = '\0';
@@ -196,7 +222,7 @@ int searchDrug(Drug* drugs, int len, string column, string value, Drug* result){
                 *result = drugs[i];
                 return 1;
             }
-        }
+        } 
     }
     else if(strcmp(column, "price") == 0){
         for(int i = 0; i < len; i++){
@@ -269,6 +295,7 @@ int updateDrug(Drug* drugs, string property, string value, int id, int len){
         strcat(text, buf);
     }
     LOG("done doing string concat, about to print");
+    removeNonPrintable(text);
     fprintf(db, text);
     fclose(db);
     LOG("data written to disk");
@@ -331,6 +358,7 @@ int deleteDrug(Drug* drugs, string identifier, string value, int len){
     }
 
     LOG("done doing string concat, about to print");
+    removeNonPrintable(text);
     fprintf(db, text);
     fclose(db);
     LOG("data written to disk");
@@ -356,6 +384,7 @@ Drug* addDrug(Drug* drugs, string name, int price, int stock, int len){
         strcat(text, buf);
     }
     LOG("done doing string concat, about to print");
+    removeNonPrintable(text);
     fprintf(db, text);
     fclose(db);
     LOG("data written to disk");
@@ -368,17 +397,13 @@ void loadTransactions(FILE* file, Transaction* transactions){
     int size = ftell(file);
     rewind(file);
     char ch;
-    string db = (string) malloc(size * sizeof(char) + 16);
+    string db = (string) malloc(size * (sizeof(char) + 1));
     for(int i = 0; i < size; i++){
         ch = getc(file);
+        if(ch == EOF) break;
         *(&db[0] + i) = ch;   
     }
     *(&db[0] + size) = '\0';
-    LOG("Done loading transactions file to memory, about to do space trimming");
-    for(int i = 0; i < 46; i++){
-        db[size - i] = '\0';
-    }
-    LOG("Done doing space trimming");
     string perline;
     string percomma;
     string dbrest = db;
@@ -398,6 +423,7 @@ void loadTransactions(FILE* file, Transaction* transactions){
         strcpy(transactions[i - 1].date, strtok_r(linerest, ",", &linerest));
         i++;
     }
+
 }
 
 
@@ -507,6 +533,7 @@ int updateTransaction(Transaction* transactions, string property, string value, 
     }
     text[strlen(text) - 1] = '\0';
     LOG("done doing string concat, about to print");
+    removeNonPrintable(text);
     fprintf(db, text);
     fclose(db);
     LOG("data written to disk");
@@ -586,6 +613,7 @@ int deleteTransaction(Transaction* transactions, string identifier, string value
     text[strlen(text) - 1] = '\0';
     strcat(text, "\0");
     LOG("done doing string concat, about to print");
+    removeNonPrintable(text);
     fprintf(db, text);
     fclose(db);
     LOG("data written to disk");
@@ -617,6 +645,7 @@ Transaction* addTransaction(Transaction* transactions, string recipient, string 
         strcat(text, buf);
     }
     LOG("done doing string concat, about to print");
+    removeNonPrintable(text);
     fprintf(db, text);
     fclose(db);
     LOG("data written to disk");
@@ -1003,20 +1032,25 @@ int main(){
                 int amount;
                 int total;
                 char holder1[20];
-                char holder2[20];
                 printf("Masukan nama pembeli: ");
                 gets(recipient);
-                printf("Masukan nama obat yang dibeli: ");
+                printf("Masukan id obat yang dibeli: ");
                 gets(ddrug);
                 printf("Masukan tanggal pembelian: ");
                 gets(date);
                 printf("Masukan jumlah obat yang dibeli: ");
                 gets(holder1);
                 amount = atoi(holder1);
-                printf("Masukan total yang harus dibayar: ");
-                gets(holder2);
-                total = atoi(holder2);
-                transactions = addTransaction(transactions, recipient, ddrug, amount, total, date, transactionsAmount);
+                char drugname[20];
+                int drugprice;
+                for(int i = 0; i < drugsAmount; i++){
+                    if(drugs[i].id == atoi(ddrug)){
+                        strcpy(drugname, drugs[i].name);
+                        drugprice = drugs[i].price;
+                    }
+                }
+                total = amount * drugprice;
+                transactions = addTransaction(transactions, recipient, drugname, amount, total, date, transactionsAmount);
                 transactionsAmount++;
                 break;
             case 11:

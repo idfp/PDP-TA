@@ -5,27 +5,27 @@ id,recipient,drug,amount,total,date
 3,Mary Davis,Acetaminophen,5,303875,2023-11-16
 4,John Smith,Amoxicillin,5,411375,2023-10-28
 5,Joseph Anderson,Simvastatin,8,788400,2023-10-21
-6,Susan Johnson,Lisinopril,8,823200,2023-11-22
-7,Susan Johnson,Lisinopril,4,411600,2023-11-14
+6,Michael Faraday,Lisinopril,8,823200,2023-11-22
+7,Michael Faraday,Lisinopril,4,411600,2023-11-14
 8,Joseph Wilson,Levothyroxine,2,243500,2023-10-27
 9,Sarah Anderson,Metformin,3,400050,2023-11-05
 10,Patricia Miller,Omeprazole,3,460125,2023-11-07
 11,Nancy Davis,Losartan,7,1143450,2023-11-08
 12,Nancy Davis,Losartan,6,980100,2023-10-20
 13,Linda Martinez,Atorvastatin,4,722400,2023-11-18
-14,Charles Johnson,Metoprolol,10,1897500,2023-11-13
+14,Charles Darwin,Metoprolol,10,1897500,2023-11-13
 15,Donna Taylor,Amlodipine,9,1813050,2023-10-14
 16,Michael Davis,Hydrochlorothiazide,2,429000,2023-11-15
 17,David Anderson,Warfarin,4,925200,2023-10-12
 18,Patricia Garcia,Gabapentin,10,2531250,2023-11-23
 19,Patricia Garcia,Gabapentin,2,506250,2023-11-07
 20,Patricia Garcia,Pantoprazole,4,1053600,2023-11-09
-21,Karen Wilson,Furosemide,3,822600,2023-11-28
+21,Wilson Lo Siento,Furosemide,3,822600,2023-11-28
 22,George Smith,Prednisone,10,2877000,2023-11-26
 23,Robert Brown,Citalopram,7,2130450,2023-10-20
-24,Charles Johnson,Sertraline,5,1608750,2023-11-16
+24,Charles Darwin,Sertraline,5,1608750,2023-11-16
 25,Donna Taylor,Fluoxetine,10,3393750,2023-11-03
-26,Karen Wilson,Loratadine,2,713700,2023-10-29
+26,Wilson Lo Siento,Loratadine,2,713700,2023-10-29
 27,Michael Garcia,Albuterol,6,2180700,2023-10-18
 28,Robert Wilson,Tramadol,6,2286900,2023-11-27
 29,Richard Martinez,Clonazepam,6,2387700,2023-11-15
@@ -37,12 +37,17 @@ id,recipient,drug,amount,total,date
 35,Jennifer Smith,Cephalexin,8,3985200,2023-11-04
 36,Helen Taylor,Ciprofloxacin,1,517050,2023-10-22
 37,Thomas Anderson,Tamsulosin,6,3212100,2023-11-30
-38,Linda Davis,Duloxetine,2,1107300,2023-10-25
-39,Linda Davis,Duloxetine,8,4429200,2023-11-07
-40,Susan Johnson,Amitriptyline,8,4575600,2023-11-28
+38,Alan Turing,Duloxetine,2,1107300,2023-10-25
+39,Alan Turing,Duloxetine,8,4429200,2023-11-07
+40,Michael Faraday,Amitriptyline,8,4575600,2023-11-28
 41,fendi,Hydrocodone,5,2921250,2023-11-27
 42,Barbara Lopez,Codeine,8,4750800,2023-11-17
 43,Fendi Permadi,Celecoxib,3,1881450,2023-10-21
 44,Thomas Anderson,Celecoxib,7,4390050,2023-11-29
 45,Fendi Permadi,Komix & Kopi,200,2000000,2023-10-11
 46,Fendi,lele,200,2000000,2023-12-11
+47,Fendi Permanen,Komix,20,200000000,2023-12-21
+48,Vega,Bodrexin,29,2072745074,2023-12-11
+49,vega,setraline,4,1287000,2023-12-11
+50,Yudi,Decolgen,20,4000000,2022-02-11
+51,Jayanta,Loratadine,20,7137000,2023-04-23

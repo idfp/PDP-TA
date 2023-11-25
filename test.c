@@ -1,8 +1,7 @@
 #include "stdio.h"
-#include "stdlib.h"
+#include "lib/sha256.h"
 
 int main(){
-    char* text = malloc(30);
-    gets(text);
-    printf("%s", text);
+    printf("%s", SHA256("12345"));
+    return 0;
 }
