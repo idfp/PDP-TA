@@ -19,7 +19,6 @@ id,recipient,drug,amount,total,date
 17,David Anderson,Warfarin,4,925200,2023-10-12
 18,Patricia Garcia,Gabapentin,10,2531250,2023-11-23
 19,Patricia Garcia,Gabapentin,2,506250,2023-11-07
-20,Patricia Garcia,Pantoprazole,4,1053600,2023-11-09
 21,Wilson Lo Siento,Furosemide,3,822600,2023-11-28
 22,George Smith,Prednisone,10,2877000,2023-11-26
 23,Robert Brown,Citalopram,7,2130450,2023-10-20
@@ -48,6 +47,5 @@ id,recipient,drug,amount,total,date
 46,Fendi,lele,200,2000000,2023-12-11
 47,Fendi Permanen,Komix,20,200000000,2023-12-21
 48,Vega,Bodrexin,29,2072745074,2023-12-11
-49,vega,setraline,4,1287000,2023-12-11
-50,Yudi,Decolgen,20,4000000,2022-02-11
-51,Jayanta,Loratadine,20,7137000,2023-04-23
+49,vega,setraline,4,1287000,2023-12-1
+50,Vega setiawan,Citalopram,20,6087000,2023-12-23

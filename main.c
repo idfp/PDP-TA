@@ -667,7 +667,6 @@ int main(){
     fclose(fdu);
 
     char username[100], password[100];
-    printf("\nv. 0.1 Alpha\n");
     do{
         printf("Login -\nMasukan Username: ");
         gets(username);
@@ -1052,6 +1051,18 @@ int main(){
                 total = amount * drugprice;
                 transactions = addTransaction(transactions, recipient, drugname, amount, total, date, transactionsAmount);
                 transactionsAmount++;
+                transaction = transactions[transactionsAmount - 1];
+                x = transaction.total / 1000;
+                y = transaction.total - (x * 1000);
+                if(x > 999){
+                    int w = x / 1000;
+                    x = x - (w * 1000);
+                    sprintf(price, "%d.%03d.%03d", w, x, y);
+                }else{
+                    sprintf(price, "%d.%03d", x, y);
+                }
+                printf("[34m%s - %s[0m\nID: %d\nNama Obat: %s\nJumlah: %d\nTotal: Rp.%s,00\n\n", transaction.recipient, transaction.date, transaction.id, transaction.drug, transaction.amount, price);
+
                 break;
             case 11:
                 printf("Bye-bye!\n");

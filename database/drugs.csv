@@ -2,7 +2,7 @@ id,name,price_usd,price,stock
 0,Aspirin,2.50,35750,50
 1,Ibuprofen,3.00,42900,75
 2,Acetaminophen,4.25,60775,60
-3,Amoxicillin,5.75,82275,80
+3,Amoxicillin,5.75,82275,39
 4,Simvastatin,6.90,98550,65
 5,Lisinopril,7.20,102900,45
 6,Levothyroxine,8.50,121750,70
@@ -19,7 +19,7 @@ id,name,price_usd,price,stock
 17,Furosemide,19.20,274200,45
 18,Prednisone,20.10,287700,90
 19,Citalopram,21.30,304350,65
-20,setraline,22.50,321750,55
+20,setraline,22.50,321750,80
 21,Fluoxetine,23.75,339375,70
 22,Loratadine,24.90,356850,75
 23,Albuterol,25.40,363450,80
@@ -40,4 +40,6 @@ id,name,price_usd,price,stock
 38,Escitalopram,42.75,612750,80
 39,Celecoxib,43.90,627150,60
 40,Komix Dan Kopi,0.65,10000,100
+40,Decolgen,1.29,20000,29
 41,Decolgen,12.90,200000,10
+42,Komix,0.13,2000,100
